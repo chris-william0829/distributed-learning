@@ -22,46 +22,40 @@ namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace MapReduce {
 
-inline constexpr Task::Impl_::Impl_(
+inline constexpr AckAndQueryNewTaskResponse::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : id_(
+      : tasktype_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        state_(
+        filename_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        file_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        workerid_(
-            &::google::protobuf::internal::fixed_address_empty_string,
-            ::_pbi::ConstantInitialized()),
-        index_{0},
+        taskid_{0},
         _cached_size_{0} {}
 
 template <typename>
-PROTOBUF_CONSTEXPR Task::Task(::_pbi::ConstantInitialized)
+PROTOBUF_CONSTEXPR AckAndQueryNewTaskResponse::AckAndQueryNewTaskResponse(::_pbi::ConstantInitialized)
     : _impl_(::_pbi::ConstantInitialized()) {}
-struct TaskDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR TaskDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~TaskDefaultTypeInternal() {}
+struct AckAndQueryNewTaskResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR AckAndQueryNewTaskResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~AckAndQueryNewTaskResponseDefaultTypeInternal() {}
   union {
-    Task _instance;
+    AckAndQueryNewTaskResponse _instance;
   };
 };
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 TaskDefaultTypeInternal _Task_default_instance_;
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AckAndQueryNewTaskResponseDefaultTypeInternal _AckAndQueryNewTaskResponse_default_instance_;
 
 inline constexpr AckAndQueryNewTaskRequest::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : state_(
+      : tasktype_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
         workerid_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
-        previoustaskindex_{0},
+        previoustaskid_{0},
         _cached_size_{0} {}
 
 template <typename>
@@ -77,48 +71,14 @@ struct AckAndQueryNewTaskRequestDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AckAndQueryNewTaskRequestDefaultTypeInternal _AckAndQueryNewTaskRequest_default_instance_;
-
-inline constexpr AckAndQueryNewTaskResponse::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : _cached_size_{0},
-        task_{nullptr},
-        mapworkercnt_{0},
-        reduceworkercnt_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR AckAndQueryNewTaskResponse::AckAndQueryNewTaskResponse(::_pbi::ConstantInitialized)
-    : _impl_(::_pbi::ConstantInitialized()) {}
-struct AckAndQueryNewTaskResponseDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR AckAndQueryNewTaskResponseDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~AckAndQueryNewTaskResponseDefaultTypeInternal() {}
-  union {
-    AckAndQueryNewTaskResponse _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AckAndQueryNewTaskResponseDefaultTypeInternal _AckAndQueryNewTaskResponse_default_instance_;
 }  // namespace MapReduce
-static ::_pb::Metadata file_level_metadata_MapReduce_2eproto[3];
+static ::_pb::Metadata file_level_metadata_MapReduce_2eproto[2];
 static constexpr const ::_pb::EnumDescriptor**
     file_level_enum_descriptors_MapReduce_2eproto = nullptr;
 static constexpr const ::_pb::ServiceDescriptor**
     file_level_service_descriptors_MapReduce_2eproto = nullptr;
 const ::uint32_t TableStruct_MapReduce_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
     protodesc_cold) = {
-    ~0u,  // no _has_bits_
-    PROTOBUF_FIELD_OFFSET(::MapReduce::Task, _internal_metadata_),
-    ~0u,  // no _extensions_
-    ~0u,  // no _oneof_case_
-    ~0u,  // no _weak_field_map_
-    ~0u,  // no _inlined_string_donated_
-    ~0u,  // no _split_
-    ~0u,  // no sizeof(Split)
-    PROTOBUF_FIELD_OFFSET(::MapReduce::Task, _impl_.id_),
-    PROTOBUF_FIELD_OFFSET(::MapReduce::Task, _impl_.state_),
-    PROTOBUF_FIELD_OFFSET(::MapReduce::Task, _impl_.index_),
-    PROTOBUF_FIELD_OFFSET(::MapReduce::Task, _impl_.file_),
-    PROTOBUF_FIELD_OFFSET(::MapReduce::Task, _impl_.workerid_),
     ~0u,  // no _has_bits_
     PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskRequest, _internal_metadata_),
     ~0u,  // no _extensions_
@@ -127,10 +87,10 @@ const ::uint32_t TableStruct_MapReduce_2eproto::offsets[] PROTOBUF_SECTION_VARIA
     ~0u,  // no _inlined_string_donated_
     ~0u,  // no _split_
     ~0u,  // no sizeof(Split)
-    PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskRequest, _impl_.previoustaskindex_),
-    PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskRequest, _impl_.state_),
+    PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskRequest, _impl_.previoustaskid_),
+    PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskRequest, _impl_.tasktype_),
     PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskRequest, _impl_.workerid_),
-    PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskResponse, _impl_._has_bits_),
+    ~0u,  // no _has_bits_
     PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskResponse, _internal_metadata_),
     ~0u,  // no _extensions_
     ~0u,  // no _oneof_case_
@@ -138,50 +98,43 @@ const ::uint32_t TableStruct_MapReduce_2eproto::offsets[] PROTOBUF_SECTION_VARIA
     ~0u,  // no _inlined_string_donated_
     ~0u,  // no _split_
     ~0u,  // no sizeof(Split)
-    PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskResponse, _impl_.task_),
-    PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskResponse, _impl_.mapworkercnt_),
-    PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskResponse, _impl_.reduceworkercnt_),
-    0,
-    ~0u,
-    ~0u,
+    PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskResponse, _impl_.tasktype_),
+    PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskResponse, _impl_.taskid_),
+    PROTOBUF_FIELD_OFFSET(::MapReduce::AckAndQueryNewTaskResponse, _impl_.filename_),
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-        {0, -1, -1, sizeof(::MapReduce::Task)},
-        {13, -1, -1, sizeof(::MapReduce::AckAndQueryNewTaskRequest)},
-        {24, 35, -1, sizeof(::MapReduce::AckAndQueryNewTaskResponse)},
+        {0, -1, -1, sizeof(::MapReduce::AckAndQueryNewTaskRequest)},
+        {11, -1, -1, sizeof(::MapReduce::AckAndQueryNewTaskResponse)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-    &::MapReduce::_Task_default_instance_._instance,
     &::MapReduce::_AckAndQueryNewTaskRequest_default_instance_._instance,
     &::MapReduce::_AckAndQueryNewTaskResponse_default_instance_._instance,
 };
 const char descriptor_table_protodef_MapReduce_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-    "\n\017MapReduce.proto\022\tMapReduce\"P\n\004Task\022\n\n\002"
-    "id\030\001 \001(\t\022\r\n\005state\030\002 \001(\t\022\r\n\005index\030\003 \001(\005\022\014"
-    "\n\004file\030\004 \001(\t\022\020\n\010workerId\030\005 \001(\t\"W\n\031AckAnd"
-    "QueryNewTaskRequest\022\031\n\021previousTaskIndex"
-    "\030\001 \001(\005\022\r\n\005state\030\002 \001(\t\022\020\n\010workerId\030\003 \001(\t\""
-    "j\n\032AckAndQueryNewTaskResponse\022\035\n\004task\030\001 "
-    "\001(\0132\017.MapReduce.Task\022\024\n\014mapWorkerCnt\030\002 \001"
-    "(\005\022\027\n\017reduceWorkerCnt\030\003 \001(\0052p\n\013TaskServi"
-    "ce\022a\n\022AckAndQueryNewTask\022$.MapReduce.Ack"
-    "AndQueryNewTaskRequest\032%.MapReduce.AckAn"
-    "dQueryNewTaskResponseb\006proto3"
+    "\n\017MapReduce.proto\022\tMapReduce\"W\n\031AckAndQu"
+    "eryNewTaskRequest\022\026\n\016previousTaskId\030\001 \001("
+    "\005\022\020\n\010taskType\030\002 \001(\t\022\020\n\010workerId\030\003 \001(\t\"P\n"
+    "\032AckAndQueryNewTaskResponse\022\020\n\010taskType\030"
+    "\001 \001(\t\022\016\n\006taskId\030\002 \001(\005\022\020\n\010fileName\030\003 \001(\t2"
+    "p\n\013TaskService\022a\n\022AckAndQueryNewTask\022$.M"
+    "apReduce.AckAndQueryNewTaskRequest\032%.Map"
+    "Reduce.AckAndQueryNewTaskResponseb\006proto"
+    "3"
 };
 static ::absl::once_flag descriptor_table_MapReduce_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_MapReduce_2eproto = {
     false,
     false,
-    429,
+    321,
     descriptor_table_protodef_MapReduce_2eproto,
     "MapReduce.proto",
     &descriptor_table_MapReduce_2eproto_once,
     nullptr,
     0,
-    3,
+    2,
     schemas,
     file_default_instances,
     TableStruct_MapReduce_2eproto::offsets,
@@ -210,312 +163,6 @@ static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_MapReduce_2eproto(&descri
 namespace MapReduce {
 // ===================================================================
 
-class Task::_Internal {
- public:
-};
-
-Task::Task(::google::protobuf::Arena* arena)
-    : ::google::protobuf::Message(arena) {
-  SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:MapReduce.Task)
-}
-inline PROTOBUF_NDEBUG_INLINE Task::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
-    const Impl_& from)
-      : id_(arena, from.id_),
-        state_(arena, from.state_),
-        file_(arena, from.file_),
-        workerid_(arena, from.workerid_),
-        _cached_size_{0} {}
-
-Task::Task(
-    ::google::protobuf::Arena* arena,
-    const Task& from)
-    : ::google::protobuf::Message(arena) {
-  Task* const _this = this;
-  (void)_this;
-  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
-      from._internal_metadata_);
-  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
-  _impl_.index_ = from._impl_.index_;
-
-  // @@protoc_insertion_point(copy_constructor:MapReduce.Task)
-}
-inline PROTOBUF_NDEBUG_INLINE Task::Impl_::Impl_(
-    ::google::protobuf::internal::InternalVisibility visibility,
-    ::google::protobuf::Arena* arena)
-      : id_(arena),
-        state_(arena),
-        file_(arena),
-        workerid_(arena),
-        _cached_size_{0} {}
-
-inline void Task::SharedCtor(::_pb::Arena* arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.index_ = {};
-}
-Task::~Task() {
-  // @@protoc_insertion_point(destructor:MapReduce.Task)
-  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
-  SharedDtor();
-}
-inline void Task::SharedDtor() {
-  ABSL_DCHECK(GetArena() == nullptr);
-  _impl_.id_.Destroy();
-  _impl_.state_.Destroy();
-  _impl_.file_.Destroy();
-  _impl_.workerid_.Destroy();
-  _impl_.~Impl_();
-}
-
-PROTOBUF_NOINLINE void Task::Clear() {
-// @@protoc_insertion_point(message_clear_start:MapReduce.Task)
-  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  _impl_.id_.ClearToEmpty();
-  _impl_.state_.ClearToEmpty();
-  _impl_.file_.ClearToEmpty();
-  _impl_.workerid_.ClearToEmpty();
-  _impl_.index_ = 0;
-  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
-}
-
-const char* Task::_InternalParse(
-    const char* ptr, ::_pbi::ParseContext* ctx) {
-  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
-  return ptr;
-}
-
-
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 5, 0, 42, 2> Task::_table_ = {
-  {
-    0,  // no _has_bits_
-    0, // no _extensions_
-    5, 56,  // max_field_number, fast_idx_mask
-    offsetof(decltype(_table_), field_lookup_table),
-    4294967264,  // skipmap
-    offsetof(decltype(_table_), field_entries),
-    5,  // num_field_entries
-    0,  // num_aux_entries
-    offsetof(decltype(_table_), field_names),  // no aux_entries
-    &_Task_default_instance_._instance,
-    ::_pbi::TcParser::GenericFallback,  // fallback
-  }, {{
-    {::_pbi::TcParser::MiniParse, {}},
-    // string id = 1;
-    {::_pbi::TcParser::FastUS1,
-     {10, 63, 0, PROTOBUF_FIELD_OFFSET(Task, _impl_.id_)}},
-    // string state = 2;
-    {::_pbi::TcParser::FastUS1,
-     {18, 63, 0, PROTOBUF_FIELD_OFFSET(Task, _impl_.state_)}},
-    // int32 index = 3;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Task, _impl_.index_), 63>(),
-     {24, 63, 0, PROTOBUF_FIELD_OFFSET(Task, _impl_.index_)}},
-    // string file = 4;
-    {::_pbi::TcParser::FastUS1,
-     {34, 63, 0, PROTOBUF_FIELD_OFFSET(Task, _impl_.file_)}},
-    // string workerId = 5;
-    {::_pbi::TcParser::FastUS1,
-     {42, 63, 0, PROTOBUF_FIELD_OFFSET(Task, _impl_.workerid_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-    {::_pbi::TcParser::MiniParse, {}},
-  }}, {{
-    65535, 65535
-  }}, {{
-    // string id = 1;
-    {PROTOBUF_FIELD_OFFSET(Task, _impl_.id_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string state = 2;
-    {PROTOBUF_FIELD_OFFSET(Task, _impl_.state_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // int32 index = 3;
-    {PROTOBUF_FIELD_OFFSET(Task, _impl_.index_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // string file = 4;
-    {PROTOBUF_FIELD_OFFSET(Task, _impl_.file_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // string workerId = 5;
-    {PROTOBUF_FIELD_OFFSET(Task, _impl_.workerid_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-  }},
-  // no aux_entries
-  {{
-    "\16\2\5\0\4\10\0\0"
-    "MapReduce.Task"
-    "id"
-    "state"
-    "file"
-    "workerId"
-  }},
-};
-
-::uint8_t* Task::_InternalSerialize(
-    ::uint8_t* target,
-    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:MapReduce.Task)
-  ::uint32_t cached_has_bits = 0;
-  (void)cached_has_bits;
-
-  // string id = 1;
-  if (!this->_internal_id().empty()) {
-    const std::string& _s = this->_internal_id();
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MapReduce.Task.id");
-    target = stream->WriteStringMaybeAliased(1, _s, target);
-  }
-
-  // string state = 2;
-  if (!this->_internal_state().empty()) {
-    const std::string& _s = this->_internal_state();
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MapReduce.Task.state");
-    target = stream->WriteStringMaybeAliased(2, _s, target);
-  }
-
-  // int32 index = 3;
-  if (this->_internal_index() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<3>(
-            stream, this->_internal_index(), target);
-  }
-
-  // string file = 4;
-  if (!this->_internal_file().empty()) {
-    const std::string& _s = this->_internal_file();
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MapReduce.Task.file");
-    target = stream->WriteStringMaybeAliased(4, _s, target);
-  }
-
-  // string workerId = 5;
-  if (!this->_internal_workerid().empty()) {
-    const std::string& _s = this->_internal_workerid();
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MapReduce.Task.workerId");
-    target = stream->WriteStringMaybeAliased(5, _s, target);
-  }
-
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target =
-        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:MapReduce.Task)
-  return target;
-}
-
-::size_t Task::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:MapReduce.Task)
-  ::size_t total_size = 0;
-
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
-
-  // string id = 1;
-  if (!this->_internal_id().empty()) {
-    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                    this->_internal_id());
-  }
-
-  // string state = 2;
-  if (!this->_internal_state().empty()) {
-    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                    this->_internal_state());
-  }
-
-  // string file = 4;
-  if (!this->_internal_file().empty()) {
-    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                    this->_internal_file());
-  }
-
-  // string workerId = 5;
-  if (!this->_internal_workerid().empty()) {
-    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                    this->_internal_workerid());
-  }
-
-  // int32 index = 3;
-  if (this->_internal_index() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_index());
-  }
-
-  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
-}
-
-const ::google::protobuf::Message::ClassData Task::_class_data_ = {
-    Task::MergeImpl,
-    nullptr,  // OnDemandRegisterArenaDtor
-};
-const ::google::protobuf::Message::ClassData* Task::GetClassData() const {
-  return &_class_data_;
-}
-
-void Task::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
-  auto* const _this = static_cast<Task*>(&to_msg);
-  auto& from = static_cast<const Task&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:MapReduce.Task)
-  ABSL_DCHECK_NE(&from, _this);
-  ::uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
-
-  if (!from._internal_id().empty()) {
-    _this->_internal_set_id(from._internal_id());
-  }
-  if (!from._internal_state().empty()) {
-    _this->_internal_set_state(from._internal_state());
-  }
-  if (!from._internal_file().empty()) {
-    _this->_internal_set_file(from._internal_file());
-  }
-  if (!from._internal_workerid().empty()) {
-    _this->_internal_set_workerid(from._internal_workerid());
-  }
-  if (from._internal_index() != 0) {
-    _this->_internal_set_index(from._internal_index());
-  }
-  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
-}
-
-void Task::CopyFrom(const Task& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:MapReduce.Task)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-PROTOBUF_NOINLINE bool Task::IsInitialized() const {
-  return true;
-}
-
-::_pbi::CachedSize* Task::AccessCachedSize() const {
-  return &_impl_._cached_size_;
-}
-void Task::InternalSwap(Task* PROTOBUF_RESTRICT other) {
-  using std::swap;
-  auto* arena = GetArena();
-  ABSL_DCHECK_EQ(arena, other->GetArena());
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.id_, &other->_impl_.id_, arena);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.state_, &other->_impl_.state_, arena);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.file_, &other->_impl_.file_, arena);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.workerid_, &other->_impl_.workerid_, arena);
-        swap(_impl_.index_, other->_impl_.index_);
-}
-
-::google::protobuf::Metadata Task::GetMetadata() const {
-  return ::_pbi::AssignDescriptors(
-      &descriptor_table_MapReduce_2eproto_getter, &descriptor_table_MapReduce_2eproto_once,
-      file_level_metadata_MapReduce_2eproto[0]);
-}
-// ===================================================================
-
 class AckAndQueryNewTaskRequest::_Internal {
  public:
 };
@@ -528,7 +175,7 @@ AckAndQueryNewTaskRequest::AckAndQueryNewTaskRequest(::google::protobuf::Arena* 
 inline PROTOBUF_NDEBUG_INLINE AckAndQueryNewTaskRequest::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
     const Impl_& from)
-      : state_(arena, from.state_),
+      : tasktype_(arena, from.tasktype_),
         workerid_(arena, from.workerid_),
         _cached_size_{0} {}
 
@@ -541,20 +188,20 @@ AckAndQueryNewTaskRequest::AckAndQueryNewTaskRequest(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
-  _impl_.previoustaskindex_ = from._impl_.previoustaskindex_;
+  _impl_.previoustaskid_ = from._impl_.previoustaskid_;
 
   // @@protoc_insertion_point(copy_constructor:MapReduce.AckAndQueryNewTaskRequest)
 }
 inline PROTOBUF_NDEBUG_INLINE AckAndQueryNewTaskRequest::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
-      : state_(arena),
+      : tasktype_(arena),
         workerid_(arena),
         _cached_size_{0} {}
 
 inline void AckAndQueryNewTaskRequest::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.previoustaskindex_ = {};
+  _impl_.previoustaskid_ = {};
 }
 AckAndQueryNewTaskRequest::~AckAndQueryNewTaskRequest() {
   // @@protoc_insertion_point(destructor:MapReduce.AckAndQueryNewTaskRequest)
@@ -563,7 +210,7 @@ AckAndQueryNewTaskRequest::~AckAndQueryNewTaskRequest() {
 }
 inline void AckAndQueryNewTaskRequest::SharedDtor() {
   ABSL_DCHECK(GetArena() == nullptr);
-  _impl_.state_.Destroy();
+  _impl_.tasktype_.Destroy();
   _impl_.workerid_.Destroy();
   _impl_.~Impl_();
 }
@@ -575,9 +222,9 @@ PROTOBUF_NOINLINE void AckAndQueryNewTaskRequest::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.state_.ClearToEmpty();
+  _impl_.tasktype_.ClearToEmpty();
   _impl_.workerid_.ClearToEmpty();
-  _impl_.previoustaskindex_ = 0;
+  _impl_.previoustaskid_ = 0;
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -589,7 +236,7 @@ const char* AckAndQueryNewTaskRequest::_InternalParse(
 
 
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 0, 57, 2> AckAndQueryNewTaskRequest::_table_ = {
+const ::_pbi::TcParseTable<2, 3, 0, 60, 2> AckAndQueryNewTaskRequest::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
@@ -604,23 +251,23 @@ const ::_pbi::TcParseTable<2, 3, 0, 57, 2> AckAndQueryNewTaskRequest::_table_ = 
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int32 previousTaskIndex = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(AckAndQueryNewTaskRequest, _impl_.previoustaskindex_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskRequest, _impl_.previoustaskindex_)}},
-    // string state = 2;
+    // int32 previousTaskId = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(AckAndQueryNewTaskRequest, _impl_.previoustaskid_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskRequest, _impl_.previoustaskid_)}},
+    // string taskType = 2;
     {::_pbi::TcParser::FastUS1,
-     {18, 63, 0, PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskRequest, _impl_.state_)}},
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskRequest, _impl_.tasktype_)}},
     // string workerId = 3;
     {::_pbi::TcParser::FastUS1,
      {26, 63, 0, PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskRequest, _impl_.workerid_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // int32 previousTaskIndex = 1;
-    {PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskRequest, _impl_.previoustaskindex_), 0, 0,
+    // int32 previousTaskId = 1;
+    {PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskRequest, _impl_.previoustaskid_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // string state = 2;
-    {PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskRequest, _impl_.state_), 0, 0,
+    // string taskType = 2;
+    {PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskRequest, _impl_.tasktype_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
     // string workerId = 3;
     {PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskRequest, _impl_.workerid_), 0, 0,
@@ -628,9 +275,9 @@ const ::_pbi::TcParseTable<2, 3, 0, 57, 2> AckAndQueryNewTaskRequest::_table_ = 
   }},
   // no aux_entries
   {{
-    "\43\0\5\10\0\0\0\0"
+    "\43\0\10\10\0\0\0\0"
     "MapReduce.AckAndQueryNewTaskRequest"
-    "state"
+    "taskType"
     "workerId"
   }},
 };
@@ -642,18 +289,18 @@ const ::_pbi::TcParseTable<2, 3, 0, 57, 2> AckAndQueryNewTaskRequest::_table_ = 
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // int32 previousTaskIndex = 1;
-  if (this->_internal_previoustaskindex() != 0) {
+  // int32 previousTaskId = 1;
+  if (this->_internal_previoustaskid() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::
         WriteInt32ToArrayWithField<1>(
-            stream, this->_internal_previoustaskindex(), target);
+            stream, this->_internal_previoustaskid(), target);
   }
 
-  // string state = 2;
-  if (!this->_internal_state().empty()) {
-    const std::string& _s = this->_internal_state();
+  // string taskType = 2;
+  if (!this->_internal_tasktype().empty()) {
+    const std::string& _s = this->_internal_tasktype();
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MapReduce.AckAndQueryNewTaskRequest.state");
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MapReduce.AckAndQueryNewTaskRequest.taskType");
     target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
@@ -682,10 +329,10 @@ const ::_pbi::TcParseTable<2, 3, 0, 57, 2> AckAndQueryNewTaskRequest::_table_ = 
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string state = 2;
-  if (!this->_internal_state().empty()) {
+  // string taskType = 2;
+  if (!this->_internal_tasktype().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
-                                    this->_internal_state());
+                                    this->_internal_tasktype());
   }
 
   // string workerId = 3;
@@ -694,10 +341,10 @@ const ::_pbi::TcParseTable<2, 3, 0, 57, 2> AckAndQueryNewTaskRequest::_table_ = 
                                     this->_internal_workerid());
   }
 
-  // int32 previousTaskIndex = 1;
-  if (this->_internal_previoustaskindex() != 0) {
+  // int32 previousTaskId = 1;
+  if (this->_internal_previoustaskid() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_previoustaskindex());
+        this->_internal_previoustaskid());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -719,14 +366,14 @@ void AckAndQueryNewTaskRequest::MergeImpl(::google::protobuf::Message& to_msg, c
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (!from._internal_state().empty()) {
-    _this->_internal_set_state(from._internal_state());
+  if (!from._internal_tasktype().empty()) {
+    _this->_internal_set_tasktype(from._internal_tasktype());
   }
   if (!from._internal_workerid().empty()) {
     _this->_internal_set_workerid(from._internal_workerid());
   }
-  if (from._internal_previoustaskindex() != 0) {
-    _this->_internal_set_previoustaskindex(from._internal_previoustaskindex());
+  if (from._internal_previoustaskid() != 0) {
+    _this->_internal_set_previoustaskid(from._internal_previoustaskid());
   }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -750,32 +397,22 @@ void AckAndQueryNewTaskRequest::InternalSwap(AckAndQueryNewTaskRequest* PROTOBUF
   auto* arena = GetArena();
   ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.state_, &other->_impl_.state_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.tasktype_, &other->_impl_.tasktype_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.workerid_, &other->_impl_.workerid_, arena);
-        swap(_impl_.previoustaskindex_, other->_impl_.previoustaskindex_);
+        swap(_impl_.previoustaskid_, other->_impl_.previoustaskid_);
 }
 
 ::google::protobuf::Metadata AckAndQueryNewTaskRequest::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_MapReduce_2eproto_getter, &descriptor_table_MapReduce_2eproto_once,
-      file_level_metadata_MapReduce_2eproto[1]);
+      file_level_metadata_MapReduce_2eproto[0]);
 }
 // ===================================================================
 
 class AckAndQueryNewTaskResponse::_Internal {
  public:
-  using HasBits = decltype(std::declval<AckAndQueryNewTaskResponse>()._impl_._has_bits_);
-  static constexpr ::int32_t kHasBitsOffset =
-    8 * PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_._has_bits_);
-  static const ::MapReduce::Task& task(const AckAndQueryNewTaskResponse* msg);
-  static void set_has_task(HasBits* has_bits) {
-    (*has_bits)[0] |= 1u;
-  }
 };
 
-const ::MapReduce::Task& AckAndQueryNewTaskResponse::_Internal::task(const AckAndQueryNewTaskResponse* msg) {
-  return *msg->_impl_.task_;
-}
 AckAndQueryNewTaskResponse::AckAndQueryNewTaskResponse(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
   SharedCtor(arena);
@@ -784,7 +421,8 @@ AckAndQueryNewTaskResponse::AckAndQueryNewTaskResponse(::google::protobuf::Arena
 inline PROTOBUF_NDEBUG_INLINE AckAndQueryNewTaskResponse::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
     const Impl_& from)
-      : _has_bits_{from._has_bits_},
+      : tasktype_(arena, from.tasktype_),
+        filename_(arena, from.filename_),
         _cached_size_{0} {}
 
 AckAndQueryNewTaskResponse::AckAndQueryNewTaskResponse(
@@ -796,33 +434,20 @@ AckAndQueryNewTaskResponse::AckAndQueryNewTaskResponse(
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
-  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
-  _impl_.task_ = (cached_has_bits & 0x00000001u)
-                ? CreateMaybeMessage<::MapReduce::Task>(arena, *from._impl_.task_)
-                : nullptr;
-  ::memcpy(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, mapworkercnt_),
-           reinterpret_cast<const char *>(&from._impl_) +
-               offsetof(Impl_, mapworkercnt_),
-           offsetof(Impl_, reduceworkercnt_) -
-               offsetof(Impl_, mapworkercnt_) +
-               sizeof(Impl_::reduceworkercnt_));
+  _impl_.taskid_ = from._impl_.taskid_;
 
   // @@protoc_insertion_point(copy_constructor:MapReduce.AckAndQueryNewTaskResponse)
 }
 inline PROTOBUF_NDEBUG_INLINE AckAndQueryNewTaskResponse::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
-      : _cached_size_{0} {}
+      : tasktype_(arena),
+        filename_(arena),
+        _cached_size_{0} {}
 
 inline void AckAndQueryNewTaskResponse::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, task_),
-           0,
-           offsetof(Impl_, reduceworkercnt_) -
-               offsetof(Impl_, task_) +
-               sizeof(Impl_::reduceworkercnt_));
+  _impl_.taskid_ = {};
 }
 AckAndQueryNewTaskResponse::~AckAndQueryNewTaskResponse() {
   // @@protoc_insertion_point(destructor:MapReduce.AckAndQueryNewTaskResponse)
@@ -831,7 +456,8 @@ AckAndQueryNewTaskResponse::~AckAndQueryNewTaskResponse() {
 }
 inline void AckAndQueryNewTaskResponse::SharedDtor() {
   ABSL_DCHECK(GetArena() == nullptr);
-  delete _impl_.task_;
+  _impl_.tasktype_.Destroy();
+  _impl_.filename_.Destroy();
   _impl_.~Impl_();
 }
 
@@ -842,15 +468,9 @@ PROTOBUF_NOINLINE void AckAndQueryNewTaskResponse::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x00000001u) {
-    ABSL_DCHECK(_impl_.task_ != nullptr);
-    _impl_.task_->Clear();
-  }
-  ::memset(&_impl_.mapworkercnt_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.reduceworkercnt_) -
-      reinterpret_cast<char*>(&_impl_.mapworkercnt_)) + sizeof(_impl_.reduceworkercnt_));
-  _impl_._has_bits_.Clear();
+  _impl_.tasktype_.ClearToEmpty();
+  _impl_.filename_.ClearToEmpty();
+  _impl_.taskid_ = 0;
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -862,45 +482,49 @@ const char* AckAndQueryNewTaskResponse::_InternalParse(
 
 
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 1, 0, 2> AckAndQueryNewTaskResponse::_table_ = {
+const ::_pbi::TcParseTable<2, 3, 0, 61, 2> AckAndQueryNewTaskResponse::_table_ = {
   {
-    PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_._has_bits_),
+    0,  // no _has_bits_
     0, // no _extensions_
     3, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
     4294967288,  // skipmap
     offsetof(decltype(_table_), field_entries),
     3,  // num_field_entries
-    1,  // num_aux_entries
-    offsetof(decltype(_table_), aux_entries),
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
     &_AckAndQueryNewTaskResponse_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // .MapReduce.Task task = 1;
-    {::_pbi::TcParser::FastMtS1,
-     {10, 0, 0, PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.task_)}},
-    // int32 mapWorkerCnt = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(AckAndQueryNewTaskResponse, _impl_.mapworkercnt_), 63>(),
-     {16, 63, 0, PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.mapworkercnt_)}},
-    // int32 reduceWorkerCnt = 3;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(AckAndQueryNewTaskResponse, _impl_.reduceworkercnt_), 63>(),
-     {24, 63, 0, PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.reduceworkercnt_)}},
+    // string taskType = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.tasktype_)}},
+    // int32 taskId = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(AckAndQueryNewTaskResponse, _impl_.taskid_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.taskid_)}},
+    // string fileName = 3;
+    {::_pbi::TcParser::FastUS1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.filename_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // .MapReduce.Task task = 1;
-    {PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.task_), _Internal::kHasBitsOffset + 0, 0,
-    (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
-    // int32 mapWorkerCnt = 2;
-    {PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.mapworkercnt_), -1, 0,
+    // string taskType = 1;
+    {PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.tasktype_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 taskId = 2;
+    {PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.taskid_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // int32 reduceWorkerCnt = 3;
-    {PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.reduceworkercnt_), -1, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-  }}, {{
-    {::_pbi::TcParser::GetTable<::MapReduce::Task>()},
-  }}, {{
+    // string fileName = 3;
+    {PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.filename_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\44\10\0\10\0\0\0\0"
+    "MapReduce.AckAndQueryNewTaskResponse"
+    "taskType"
+    "fileName"
   }},
 };
 
@@ -911,26 +535,27 @@ const ::_pbi::TcParseTable<2, 3, 1, 0, 2> AckAndQueryNewTaskResponse::_table_ = 
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  cached_has_bits = _impl_._has_bits_[0];
-  // .MapReduce.Task task = 1;
-  if (cached_has_bits & 0x00000001u) {
-    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-        1, _Internal::task(this),
-        _Internal::task(this).GetCachedSize(), target, stream);
+  // string taskType = 1;
+  if (!this->_internal_tasktype().empty()) {
+    const std::string& _s = this->_internal_tasktype();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MapReduce.AckAndQueryNewTaskResponse.taskType");
+    target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // int32 mapWorkerCnt = 2;
-  if (this->_internal_mapworkercnt() != 0) {
+  // int32 taskId = 2;
+  if (this->_internal_taskid() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::
         WriteInt32ToArrayWithField<2>(
-            stream, this->_internal_mapworkercnt(), target);
+            stream, this->_internal_taskid(), target);
   }
 
-  // int32 reduceWorkerCnt = 3;
-  if (this->_internal_reduceworkercnt() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<3>(
-            stream, this->_internal_reduceworkercnt(), target);
+  // string fileName = 3;
+  if (!this->_internal_filename().empty()) {
+    const std::string& _s = this->_internal_filename();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "MapReduce.AckAndQueryNewTaskResponse.fileName");
+    target = stream->WriteStringMaybeAliased(3, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -950,23 +575,22 @@ const ::_pbi::TcParseTable<2, 3, 1, 0, 2> AckAndQueryNewTaskResponse::_table_ = 
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // .MapReduce.Task task = 1;
-  cached_has_bits = _impl_._has_bits_[0];
-  if (cached_has_bits & 0x00000001u) {
-    total_size +=
-        1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.task_);
+  // string taskType = 1;
+  if (!this->_internal_tasktype().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_tasktype());
   }
 
-  // int32 mapWorkerCnt = 2;
-  if (this->_internal_mapworkercnt() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_mapworkercnt());
+  // string fileName = 3;
+  if (!this->_internal_filename().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_filename());
   }
 
-  // int32 reduceWorkerCnt = 3;
-  if (this->_internal_reduceworkercnt() != 0) {
+  // int32 taskId = 2;
+  if (this->_internal_taskid() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_reduceworkercnt());
+        this->_internal_taskid());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -988,15 +612,14 @@ void AckAndQueryNewTaskResponse::MergeImpl(::google::protobuf::Message& to_msg, 
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if ((from._impl_._has_bits_[0] & 0x00000001u) != 0) {
-    _this->_internal_mutable_task()->::MapReduce::Task::MergeFrom(
-        from._internal_task());
+  if (!from._internal_tasktype().empty()) {
+    _this->_internal_set_tasktype(from._internal_tasktype());
   }
-  if (from._internal_mapworkercnt() != 0) {
-    _this->_internal_set_mapworkercnt(from._internal_mapworkercnt());
+  if (!from._internal_filename().empty()) {
+    _this->_internal_set_filename(from._internal_filename());
   }
-  if (from._internal_reduceworkercnt() != 0) {
-    _this->_internal_set_reduceworkercnt(from._internal_reduceworkercnt());
+  if (from._internal_taskid() != 0) {
+    _this->_internal_set_taskid(from._internal_taskid());
   }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -1017,20 +640,18 @@ PROTOBUF_NOINLINE bool AckAndQueryNewTaskResponse::IsInitialized() const {
 }
 void AckAndQueryNewTaskResponse::InternalSwap(AckAndQueryNewTaskResponse* PROTOBUF_RESTRICT other) {
   using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.reduceworkercnt_)
-      + sizeof(AckAndQueryNewTaskResponse::_impl_.reduceworkercnt_)
-      - PROTOBUF_FIELD_OFFSET(AckAndQueryNewTaskResponse, _impl_.task_)>(
-          reinterpret_cast<char*>(&_impl_.task_),
-          reinterpret_cast<char*>(&other->_impl_.task_));
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.tasktype_, &other->_impl_.tasktype_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.filename_, &other->_impl_.filename_, arena);
+        swap(_impl_.taskid_, other->_impl_.taskid_);
 }
 
 ::google::protobuf::Metadata AckAndQueryNewTaskResponse::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_MapReduce_2eproto_getter, &descriptor_table_MapReduce_2eproto_once,
-      file_level_metadata_MapReduce_2eproto[2]);
+      file_level_metadata_MapReduce_2eproto[1]);
 }
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace MapReduce

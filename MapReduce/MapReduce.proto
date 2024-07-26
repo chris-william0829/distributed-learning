@@ -3,24 +3,16 @@ syntax = "proto3";
 package MapReduce;
 
 
-message Task {
-    string id = 1;
-    string state = 2;
-    int32 index = 3;
-    string file = 4;
-    string workerId = 5;
-}
-
 message AckAndQueryNewTaskRequest {
-    int32 previousTaskIndex = 1;
-    string state = 2;
+    int32 previousTaskId = 1;
+    string taskType = 2;
     string workerId = 3;
 }
 
 message AckAndQueryNewTaskResponse {
-    Task task = 1;
-    int32 mapWorkerCnt = 2;
-    int32 reduceWorkerCnt = 3;
+    string taskType = 1;
+    int32 taskId = 2;
+    string fileName = 3;
 }
 
 service TaskService {
