@@ -106,6 +106,7 @@ void worker(){
             std::this_thread::sleep_for(std::chrono::seconds(1));
             continue;
         }
+        std::cout << "Get task " << response->tasktype() << " " << response->taskid() << " " << response->filename() << std::endl;
 
         if(response->tasktype() == "map"){
             std::vector<KeyValue> kvs = mapFunc(response->filename());
@@ -172,6 +173,9 @@ void worker(){
         if(response->tasktype() == "finish"){
             break;
         }
+        taskType = response->tasktype();
+        previousTaskId = response->taskid();
+        std::cout<< "Finished task: "<< previousTaskId << "on worker: " << workerId << std::endl;
     }
     return;
 }

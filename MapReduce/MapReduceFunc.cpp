@@ -17,7 +17,7 @@
 extern "C" std::vector<KeyValue> mapFunc(std::string filename){
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "Error opening file!" << std::endl;
+        std::cerr << "Error opening file:" << filename << std::endl;
     }
     std::vector<KeyValue> kvs;
     std::string line;

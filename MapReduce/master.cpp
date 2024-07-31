@@ -64,7 +64,7 @@ public:
     void getReduceTasks();
     void handlePreviousTask(const AckAndQueryNewTaskRequest* request);
     void transit();
-    Task* getAvailableTask();
+    std::unique_ptr<Task> getAvailableTask();
 };
 
 int Master::mapTaskCnt = 0;
@@ -117,8 +117,8 @@ void Master::handlePreviousTask(const AckAndQueryNewTaskRequest* request) {
     std::unique_lock<std::mutex> lock(mtx);
     auto it = tasksDoing.find(request->previoustaskid());
     if (it != tasksDoing.end()) {
-        Task* task = it->second.get();
-        if (task->workerId == request->workerid()) {
+        if (it->second->workerId == request->workerid()) {
+            std::unique_ptr<Task> task = std::move(it->second);
             tasksDoing.erase(it);
             if (task->taskType == "map") {
                 std::cout << "map-task:" << task->taskId << " finished on worker " << task->workerId << std::endl;
@@ -146,26 +146,26 @@ void Master::handlePreviousTask(const AckAndQueryNewTaskRequest* request) {
                 }
             }
         } else {
-            std::cout << task->taskType << " task " << task->taskId << " is no longer belongs to this worker" << std::endl;
+            std::cout << it->second->taskType << " task " << it->second->taskId << " is no longer belongs to this worker" << std::endl;
         }
     } else {
         std::cout << "The task is not in the doing queue" << std::endl;
     }
 }
 
-Task* Master::getAvailableTask() {
+std::unique_ptr<Task> Master::getAvailableTask() {
     std::unique_lock<std::mutex> lock(mtx);
     if(state == "map" || state == "reduce"){
         if (!tasksToDo.empty()) {
             auto it = tasksToDo.begin();
-            Task* task = it->second.get();
+            std::unique_ptr<Task> task = std::move(it->second);
             tasksToDo.erase(it);
             return task;
         }else{
             return nullptr;
         }
     }else if(state == "finished"){
-        Task *task = new Task();
+        auto task = std::make_unique<Task>();
         task->taskType = "finish";
         task->taskId = -1;
         task->filename = "";
@@ -184,15 +184,16 @@ public:
             master->handlePreviousTask(request);
         }
         // Step 2: Assign a new task
-        Task* task = master->getAvailableTask();
+        std::unique_ptr<Task> task = master->getAvailableTask();
         if (task != nullptr) {
+            std::cout << "Task ID: " << task->taskId << ", Task Name: " << task->filename << std::endl;
             std::unique_lock<std::mutex> lock(master->mtx);
             task->workerId = request->workerid();
             task->deadline = std::chrono::high_resolution_clock::now() + std::chrono::seconds(10);
-            master->tasksDoing[task->taskId] = std::make_unique<Task>(*task);
             reply->set_taskid(task->taskId);
             reply->set_filename(task->filename);
             reply->set_tasktype(task->taskType);
+            master->tasksDoing[task->taskId] = std::move(task);
             return Status::OK;
         } else {
             return Status::CANCELLED;
