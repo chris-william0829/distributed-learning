@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package rpc;
+
+service KVStore {
+    rpc Get(GetRequest) returns (GetResponse);
+    rpc Set(SetRequest) returns (SetResponse);
+    rpc Delete(DeleteRequest) returns (DeleteResponse);
+}
+
+message GetRequest {
+    string key = 1;
+}
+
+message GetResponse {
+    string value = 1;
+}
+
+message SetRequest {
+    string key = 1;
+    string value = 2;
+}
+
+message SetResponse {
+    bool success = 1;
+}
+
+message DeleteRequest {
+    string key = 1;
+}
+
+message DeleteResponse {
+    bool success = 1;
+}
