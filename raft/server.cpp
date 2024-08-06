@@ -4,8 +4,44 @@
 #include "kvstore/store.hpp"
 #include "raft/raft.hpp"
 
+
+class KeyValueStore {
+public:
+    KeyValueStore(RaftNode* raftNode) : raftNode(raftNode) {
+        // 设置 Raft 层的回调函数
+        raftNode->applyCh = [this](const ApplyMsg& msg) {
+            return this->applyLogEntry(msg);  // 直接处理日志条目并返回处理结果
+        };
+    }
+
+    void put(const std::string& key, const std::string& value) {
+        std::string request = key + ":" + value;
+        raftNode->start(request);
+    }
+
+private:
+    RaftNode* raftNode;
+    std::unordered_map<std::string, std::string> kvStore;
+
+    bool applyLogEntry(const ApplyMsg& msg) {
+        try {
+            kvStore[msg.key] = msg.value;
+            std::cout << "Applied log entry: key=" << msg.key << ", value=" << msg.value << std::endl;
+            return true;  // 处理成功
+        } catch (...) {
+            std::cerr << "Failed to apply log entry: key=" << msg.key << ", value=" << msg.value << std::endl;
+            return false;  // 处理失败
+        }
+    }
+};
+
+
+
 class KVStoreServiceImpl final : public rpc::KVStore::Service {
 public:
+
+
+
     KVStoreServiceImpl(RaftNode* raftNode, KVStore* store) : raftNode_(raftNode), store_(store) {}
 
     grpc::Status Get(grpc::ServerContext* context, const rpc::GetRequest* request, rpc::GetResponse* response) override {
