@@ -12,12 +12,8 @@
 #include <grpcpp/grpcpp.h>
 #include "raftRpc.pb.h"
 #include "raftRpc.grpc.pb.h"
+#include "ApplyMsg.h"
 
-
-struct ApplyMsg {
-    std::string key;
-    std::string value;
-};
 
 ApplyMsg parseLogEntry(const LogEntry& entry) {
     ApplyMsg msg;
@@ -46,17 +42,22 @@ class RaftNode {
         std::mutex mtx;
         std::vector<LogEntry> log;
         std::function<bool(const ApplyMsg&)> applyCh;
+        std::vector<std::promise<bool>*> pendingPromises;
 
-
+        void setApplyCh(std::function<bool(const ApplyMsg&)> ch);
         void startElection();
         void appendEntries();
         void sendAppendEntries(int peerIndex);
         void tryCommitEntries();
-
+        int start(const std::string& command, std::promise<bool>& resultPromise);
         bool handleRequestVote(const raftRpc::RequestVoteRequest* request);
         bool handleAppendEntries(const raftRpc::AppendEntriesRequest* request);
 
 };
+
+void RaftNode::setApplyCh(std::function<bool(const ApplyMsg&)> ch) {
+    applyCh = ch;
+}
 
 void RaftNode::startElection() {
     std::unique_lock<std::mutex> lock(mtx);
@@ -121,6 +122,7 @@ void RaftNode::tryCommitEntries() {
                 }
 
                 commitIndex = i;  // 更新 commitIndex
+                pendingPromises[commitIndex]->set_value(true);
             }
     }
 }
@@ -171,6 +173,18 @@ void RaftNode::appendEntries() {
     tryCommitEntries();
 
 }
+
+int RaftNode::start(const std::string& command, std::promise<bool>& resultPromise){
+    if(state != "Leader"){
+        return votedFor;
+    }
+    std::unique_lock<std::mutex> lock(mtx);
+    log.push_back({currentTerm, command});
+    pendingPromises[log.size()-1] = &resultPromise;
+    appendEntries();
+    return id;
+}
+
 
 bool RaftNode::handleRequestVote(const raftRpc::RequestVoteRequest* request){
     if(request->term() > currentTerm) {

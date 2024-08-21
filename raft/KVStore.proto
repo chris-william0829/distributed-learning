@@ -1,11 +1,10 @@
 syntax = "proto3";
 
-package rpc;
+package KVStore;
 
 service KVStore {
     rpc Get(GetRequest) returns (GetResponse);
     rpc Set(SetRequest) returns (SetResponse);
-    rpc Delete(DeleteRequest) returns (DeleteResponse);
 }
 
 message GetRequest {
@@ -22,13 +21,5 @@ message SetRequest {
 }
 
 message SetResponse {
-    bool success = 1;
-}
-
-message DeleteRequest {
-    string key = 1;
-}
-
-message DeleteResponse {
     bool success = 1;
 }

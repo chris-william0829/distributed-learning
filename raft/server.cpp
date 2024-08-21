@@ -1,27 +1,57 @@
 #include <iostream>
+#include <vector>
 #include <grpcpp/grpcpp.h>
-#include "rpc.grpc.pb.h"
-#include "kvstore/store.hpp"
-#include "raft/raft.hpp"
+#include "KVStore.grpc.pb.h"
+#include "KVStore.pb.h"
+#include "ApplyMsg.h"
+#include "raftRpc.h"
 
 
-class KeyValueStore {
+class KeyValueStore final : public KVStore::KVStore::Service {
 public:
-    KeyValueStore(RaftNode* raftNode) : raftNode(raftNode) {
-        // 设置 Raft 层的回调函数
-        raftNode->applyCh = [this](const ApplyMsg& msg) {
-            return this->applyLogEntry(msg);  // 直接处理日志条目并返回处理结果
-        };
+    KeyValueStore(std::vector<std::unique_ptr<RaftNode>>& nodes)
+        : raftNodes(nodes), leaderIndex(0) {
+        // 初始化 applyCh 回调函数
+        for (auto& node : raftNodes) {
+            node->setApplyCh([this](const ApplyMsg& msg) {
+                return this->applyLogEntry(msg);
+            });
+        }
     }
 
-    void put(const std::string& key, const std::string& value) {
-        std::string request = key + ":" + value;
-        raftNode->start(request);
+    grpc::Status Set(grpc::ServerContext* context, const KVStore::SetRequest* request, KVStore::SetResponse* response) override {
+        std::promise<bool> resultPromise;
+        auto resultFuture = resultPromise.get_future();
+
+        // 向 Raft 节点发起请求
+        while (true) {
+            int leaderId = raftNodes[leaderIndex]->start(request->key() + ":" + request->value(), resultPromise);
+            if (leaderId == leaderIndex) {
+                break;
+            } else {
+                leaderIndex = leaderId;
+            }
+        }
+
+        bool success = resultFuture.get();  // 等待 Raft 层响应
+        response->set_success(success);
+        return grpc::Status::OK;
+    }
+
+    grpc::Status Get(grpc::ServerContext* context, const KVStore::GetRequest* request, KVStore::GetResponse* response) override {
+        auto it = kvStore.find(request->key());
+        if (it != kvStore.end()) {
+            response->set_value(it->second);
+        } else {
+            response->set_value("");  // 如果键不存在，返回空字符串
+        }
+        return grpc::Status::OK;
     }
 
 private:
-    RaftNode* raftNode;
+    std::vector<std::unique_ptr<RaftNode>>& raftNodes;
     std::unordered_map<std::string, std::string> kvStore;
+    int leaderIndex;
 
     bool applyLogEntry(const ApplyMsg& msg) {
         try {
@@ -36,67 +66,9 @@ private:
 };
 
 
-
-class KVStoreServiceImpl final : public rpc::KVStore::Service {
-public:
-
-
-
-    KVStoreServiceImpl(RaftNode* raftNode, KVStore* store) : raftNode_(raftNode), store_(store) {}
-
-    grpc::Status Get(grpc::ServerContext* context, const rpc::GetRequest* request, rpc::GetResponse* response) override {
-        std::string value = store_->Get(request->key());
-        response->set_value(value);
-        return grpc::Status::OK;
-    }
-
-    grpc::Status Set(grpc::ServerContext* context, const rpc::SetRequest* request, rpc::SetResponse* response) override {
-        if (raftNode_->isLeader()) {
-            // Apply the command through Raft
-            std::string command = "SET " + request->key() + " " + request->value();
-            raftNode_->handleClientRequest(command);
-            response->set_success(true);
-        } else {
-            // Redirect to the current leader (not implemented in this snippet)
-            response->set_success(false);
-        }
-        return grpc::Status::OK;
-    }
-
-    grpc::Status Delete(grpc::ServerContext* context, const rpc::DeleteRequest* request, rpc::DeleteResponse* response) override {
-        if (raftNode_->isLeader()) {
-            // Apply the command through Raft
-            std::string command = "DELETE " + request->key();
-            raftNode_->handleClientRequest(command);
-            response->set_success(true);
-        } else {
-            // Redirect to the current leader (not implemented in this snippet)
-            response->set_success(false);
-        }
-        return grpc::Status::OK;
-    }
-
-private:
-    RaftNode* raftNode_;
-    KVStore* store_;
-};
-
 void RunServer() {
     std::string server_address("0.0.0.0:50051");
-    KVStore store;
-    RaftNode raftNode(1, 3); // Example: node ID 1 in a 3-node cluster
-
-    KVStoreServiceImpl service(&raftNode, &store);
-    grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
-
-    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    std::cout << "Server listening on " << server_address << std::endl;
-
-    raftNode.start();
-    server->Wait();
-    raftNode.stopNode();
+    
 }
 
 int main(int argc, char** argv) {
