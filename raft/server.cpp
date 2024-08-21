@@ -68,7 +68,61 @@ private:
 
 void RunServer() {
     std::string server_address("0.0.0.0:50051");
+    const std::vector<std::string> peerAddresses = {
+        "0.0.0.0:50052", // 节点 1 的地址
+        "0.0.0.0:50053", // 节点 2 的地址
+        "0.0.0.0:50054"  // 节点 3 的地址
+    };
+
+    // 创建 Raft 节点
+    std::vector<std::unique_ptr<RaftNode>> raftNodes;
+    for (size_t i = 0; i < peerAddresses.size(); ++i) {
+        raftNodes.push_back(std::make_unique<RaftNode>(i, peerAddresses[i]));
+    }
+
+    // 创建 KeyValueStore 服务实例
+    KeyValueStore kvStoreService(raftNodes);
+
+    // 启动每个 Raft 节点的 gRPC 服务器
+    std::vector<std::unique_ptr<RaftRpcServiceImpl>> services;
+    std::vector<std::unique_ptr<grpc::Server>> raftServers;
     
+    for (size_t i = 0; i < raftNodes.size(); ++i) {
+        auto& node = raftNodes[i];
+        std::string server_address = peerAddresses[i];
+    
+        auto service = std::make_unique<RaftRpcServiceImpl>(node.get());
+        services.push_back(std::move(service));
+    
+        grpc::ServerBuilder builder;
+        builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+        builder.RegisterService(services.back().get());
+    
+        auto server = builder.BuildAndStart();
+        std::cout << "Raft node " << i << " listening on " << server_address << std::endl;
+        raftServers.push_back(std::move(server));
+    
+        node->initPeers(peerAddresses);
+    
+        std::thread([node = node.get()]() {
+            node->heartbeat();
+        }).detach();
+    
+        std::thread([node = node.get()]() {
+            node->electionTimeout();
+        }).detach();
+    }
+
+    
+    grpc::ServerBuilder builder;
+    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+    builder.RegisterService(&kvStoreService);
+
+    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+    std::cout << "Server listening on " << server_address << std::endl;
+
+    // 阻塞主线程，直到服务器关闭
+    server->Wait();
 }
 
 int main(int argc, char** argv) {

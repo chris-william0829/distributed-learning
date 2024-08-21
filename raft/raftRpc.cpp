@@ -14,19 +14,34 @@
 #include "raftRpc.grpc.pb.h"
 #include "ApplyMsg.h"
 
-
-ApplyMsg parseLogEntry(const LogEntry& entry) {
-    ApplyMsg msg;
-    size_t pos = entry.command.find(":");
-    msg.key = entry.command.substr(0, pos);
-    msg.value = entry.command.substr(pos + 1);
-    return msg;
-}
-
-struct LogEntry {
+struct LogEnt {
     int term;
     std::string command;
 };
+
+ApplyMsg parseLogEntry(const LogEnt& entry) {
+    ApplyMsg msg;
+    
+    // 找到分隔符的位置
+    size_t pos = entry.command.find(":");
+
+    // 检查是否找到了分隔符
+    if (pos == std::string::npos) {
+        // 处理错误情况，例如记录日志或抛出异常
+        std::cerr << "Invalid command format in LogEntry: " << entry.command << std::endl;
+        // 设置默认值或者抛出异常
+        msg.key = "";
+        msg.value = "";
+        return msg;
+    }
+
+    // 提取 key 和 value
+    msg.key = entry.command.substr(0, pos);
+    msg.value = entry.command.substr(pos + 1);
+
+    return msg;
+}
+
 
 class RaftNode {
     public:
@@ -35,15 +50,20 @@ class RaftNode {
         int votedFor;
         int commitIndex;
         int lastApplied;
+        std::string address;
         std::vector<int> nextIndex; // 记录领导者发送给每个跟随者的下一个日志条目索引
         std::vector<int> matchIndex; // 记录每个跟随者复制的最大日志条目索引
         std::vector<std::unique_ptr<raftRpc::RaftRpcService::Stub>> peers; // gRPC stubs for other nodes
         std::string state;
         std::mutex mtx;
-        std::vector<LogEntry> log;
+        std::vector<LogEnt> log;
         std::function<bool(const ApplyMsg&)> applyCh;
         std::vector<std::promise<bool>*> pendingPromises;
-
+        std::atomic<bool> running{true};
+        std::condition_variable cv; // 用于等待和通知
+        std::chrono::steady_clock::time_point lastHeartbeatTime; // 上一次心跳时间
+        RaftNode(int id, std::string address);
+        ~RaftNode();
         void setApplyCh(std::function<bool(const ApplyMsg&)> ch);
         void startElection();
         void appendEntries();
@@ -52,8 +72,68 @@ class RaftNode {
         int start(const std::string& command, std::promise<bool>& resultPromise);
         bool handleRequestVote(const raftRpc::RequestVoteRequest* request);
         bool handleAppendEntries(const raftRpc::AppendEntriesRequest* request);
+        void heartbeat();
+        void electionTimeout();
+        void initPeers(const std::vector<std::string>& peerAddresses);
+        void updateLastHeartbeatTime();
+    private:
+        int HEARTBEAT_INTERVAL_MS = 100;
+        int ELECTION_TIMEOUT_MS = 150;
 
 };
+
+
+
+void RaftNode::heartbeat(){
+    while(running){
+        std::this_thread::sleep_for(std::chrono::milliseconds(HEARTBEAT_INTERVAL_MS));
+        if (state == "Leader") {
+            appendEntries();  // 发送心跳
+        }
+    }
+}
+
+void RaftNode::electionTimeout() {
+    std::unique_lock<std::mutex> lock(mtx);
+    while (running) {
+        auto now = std::chrono::steady_clock::now();
+        auto timeout = std::chrono::milliseconds(ELECTION_TIMEOUT_MS);
+        cv.wait_until(lock, lastHeartbeatTime + timeout, [this]() {
+            return !running || std::chrono::steady_clock::now() >= lastHeartbeatTime + std::chrono::milliseconds(ELECTION_TIMEOUT_MS);
+        });
+
+        if (running && std::chrono::steady_clock::now() >= lastHeartbeatTime + timeout) {
+            if (state == "Follower" || state == "Candidate") {
+                startElection();  // 发起选举
+            }
+        }
+    }
+}
+
+void RaftNode::updateLastHeartbeatTime() {
+    std::unique_lock<std::mutex> lock(mtx);
+    lastHeartbeatTime = std::chrono::steady_clock::now();
+    cv.notify_all(); // 通知等待的线程
+}
+
+RaftNode::RaftNode(int id, std::string address) 
+    : id(id), currentTerm(0), votedFor(-1), commitIndex(0), lastApplied(0), address(address), state("Follower") {
+    lastHeartbeatTime = std::chrono::steady_clock::now();
+}
+
+RaftNode::~RaftNode(){
+    running = false;
+}
+
+// 初始化 peers
+void RaftNode::initPeers(const std::vector<std::string>& peerAddresses) {
+    for (size_t i = 0; i < peerAddresses.size(); ++i) {
+        if (peerAddresses[i] != address) { // 不包括自己
+            peers[i] = raftRpc::RaftRpcService::NewStub(
+                grpc::CreateChannel(peerAddresses[i], grpc::InsecureChannelCredentials()));
+        }
+    }
+}
 
 void RaftNode::setApplyCh(std::function<bool(const ApplyMsg&)> ch) {
     applyCh = ch;
@@ -165,9 +245,12 @@ void RaftNode::appendEntries() {
         futures.push_back(std::async(std::launch::async, &RaftNode::sendAppendEntries, this, i));
     }
 
-    // 等待所有异步任务完成
     for (auto& future : futures) {
-        future.get();
+        try {
+            future.get();  // 等待异步任务完成
+        } catch (const std::exception& e) {
+            std::cerr << "Exception caught in appendEntries: " << e.what() << std::endl;
+        }
     }
 
     tryCommitEntries();
@@ -180,7 +263,7 @@ int RaftNode::start(const std::string& command, std::promise<bool>& resultPromis
     }
     std::unique_lock<std::mutex> lock(mtx);
     log.push_back({currentTerm, command});
-    pendingPromises[log.size()-1] = &resultPromise;
+    pendingPromises.push_back(&resultPromise);
     appendEntries();
     return id;
 }
@@ -202,7 +285,7 @@ bool RaftNode::handleRequestVote(const raftRpc::RequestVoteRequest* request){
     return false;
 }
 
-bool RaftNode::handleAppendEntries(const raftRpc::AppendEntriesRequest* request){
+bool RaftNode::handleAppendEntries(const raftRpc::AppendEntriesRequest* request) {
     if (request->term() < currentTerm) {
         return false;
     }
@@ -210,7 +293,17 @@ bool RaftNode::handleAppendEntries(const raftRpc::AppendEntriesRequest* request)
         return false;
     }
     log.erase(log.begin() + request->prevlogindex() + 1, log.end());
-    log.insert(log.end(), request->entries().begin(), request->entries().end());
+
+    // Convert Protobuf RepeatedPtrField to std::vector
+    std::vector<LogEnt> newEntries;
+    for (const auto& entry : request->entries()) {
+        LogEnt logEntry;
+        logEntry.term = entry.term();
+        logEntry.command = entry.command();
+        newEntries.push_back(logEntry);
+    }
+
+    log.insert(log.end(), newEntries.begin(), newEntries.end());
 
     if (request->leadercommit() > commitIndex) {
         commitIndex = std::min(request->leadercommit(), static_cast<int>(log.size() - 1));
@@ -218,6 +311,7 @@ bool RaftNode::handleAppendEntries(const raftRpc::AppendEntriesRequest* request)
 
     return true;
 }
+
 
 class RaftRpcServiceImpl final : public raftRpc::RaftRpcService::Service {
     public:
@@ -227,6 +321,7 @@ class RaftRpcServiceImpl final : public raftRpc::RaftRpcService::Service {
             std::unique_lock<std::mutex> lock(node->mtx);
             response->set_term(node->currentTerm);
             response->set_votegranted(node->handleRequestVote(request));
+            return grpc::Status::OK;
         }
 
         grpc::Status AppendEntries(grpc::ServerContext* context, const raftRpc::AppendEntriesRequest* request, raftRpc::AppendEntriesResponse* response) override {
