@@ -20,6 +20,7 @@ public:
     }
 
     grpc::Status Set(grpc::ServerContext* context, const KVStore::SetRequest* request, KVStore::SetResponse* response) override {
+        std::cout << "Receive SET Operation: SET" << request->key() << " to " << request->value() << std::endl;
         std::promise<bool> resultPromise;
         auto resultFuture = resultPromise.get_future();
 
@@ -27,13 +28,16 @@ public:
         while (true) {
             int leaderId = raftNodes[leaderIndex]->start(request->key() + ":" + request->value(), resultPromise);
             if (leaderId == leaderIndex) {
+                std::cout << "Forward SET operation to raft layer" << std::endl;
                 break;
             } else {
+                std::cout << "raft leader changed" << std::endl;
                 leaderIndex = leaderId;
             }
         }
 
         bool success = resultFuture.get();  // 等待 Raft 层响应
+        std::cout << "SET SUCCESS" << std::endl;
         response->set_success(success);
         return grpc::Status::OK;
     }
@@ -86,22 +90,26 @@ void RunServer() {
     // 启动每个 Raft 节点的 gRPC 服务器
     std::vector<std::unique_ptr<RaftRpcServiceImpl>> services;
     std::vector<std::unique_ptr<grpc::Server>> raftServers;
-    
+
     for (size_t i = 0; i < raftNodes.size(); ++i) {
         auto& node = raftNodes[i];
         std::string server_address = peerAddresses[i];
-    
+
         auto service = std::make_unique<RaftRpcServiceImpl>(node.get());
         services.push_back(std::move(service));
-    
+
         grpc::ServerBuilder builder;
         builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
         builder.RegisterService(services.back().get());
-    
+
         auto server = builder.BuildAndStart();
         std::cout << "Raft node " << i << " listening on " << server_address << std::endl;
         raftServers.push_back(std::move(server));
-    
+    }
+
+    sleep(6);
+
+    for(auto& node : raftNodes){
         node->initPeers(peerAddresses);
     
         std::thread([node = node.get()]() {
@@ -113,7 +121,6 @@ void RunServer() {
         }).detach();
     }
 
-    
     grpc::ServerBuilder builder;
     builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
     builder.RegisterService(&kvStoreService);

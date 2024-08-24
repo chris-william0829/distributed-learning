@@ -78,7 +78,7 @@ class RaftNode {
         void updateLastHeartbeatTime();
     private:
         int HEARTBEAT_INTERVAL_MS = 100;
-        int ELECTION_TIMEOUT_MS = 150;
+        int ELECTION_TIMEOUT_MS = 1000;
 
 };
 
@@ -94,16 +94,20 @@ void RaftNode::heartbeat(){
 }
 
 void RaftNode::electionTimeout() {
-    std::unique_lock<std::mutex> lock(mtx);
+    lastHeartbeatTime = std::chrono::steady_clock::now();
     while (running) {
         auto now = std::chrono::steady_clock::now();
-        auto timeout = std::chrono::milliseconds(ELECTION_TIMEOUT_MS);
-        cv.wait_until(lock, lastHeartbeatTime + timeout, [this]() {
-            return !running || std::chrono::steady_clock::now() >= lastHeartbeatTime + std::chrono::milliseconds(ELECTION_TIMEOUT_MS);
-        });
+        auto timeout = std::chrono::milliseconds(id * ELECTION_TIMEOUT_MS);
+        {
+            std::unique_lock<std::mutex> lock(mtx);
+            cv.wait_until(lock, lastHeartbeatTime + timeout, [this]() {
+                return !running || std::chrono::steady_clock::now() >= lastHeartbeatTime + std::chrono::milliseconds(ELECTION_TIMEOUT_MS);
+            });
+        }
 
         if (running && std::chrono::steady_clock::now() >= lastHeartbeatTime + timeout) {
             if (state == "Follower" || state == "Candidate") {
+                std::cout << "Election timeout occurred!" << std::endl;
                 startElection();  // 发起选举
             }
         }
@@ -129,8 +133,8 @@ RaftNode::~RaftNode(){
 void RaftNode::initPeers(const std::vector<std::string>& peerAddresses) {
     for (size_t i = 0; i < peerAddresses.size(); ++i) {
         if (peerAddresses[i] != address) { // 不包括自己
-            peers[i] = raftRpc::RaftRpcService::NewStub(
-                grpc::CreateChannel(peerAddresses[i], grpc::InsecureChannelCredentials()));
+            peers.push_back(raftRpc::RaftRpcService::NewStub(
+                grpc::CreateChannel(peerAddresses[i], grpc::InsecureChannelCredentials())));
         }
     }
 }
@@ -141,28 +145,33 @@ void RaftNode::setApplyCh(std::function<bool(const ApplyMsg&)> ch) {
 
 void RaftNode::startElection() {
     std::unique_lock<std::mutex> lock(mtx);
+    std::cout << "node: " << id << " start election" << std::endl;
     currentTerm++;
     state = "Candidate";
     votedFor = id;
 
     int votes = 1; // Vote for self
-
+    std::cout << peers.size() << std::endl;
     for (auto& peer : peers) {
         raftRpc::RequestVoteRequest request;
         request.set_term(currentTerm);
         request.set_candidateid(id);
-        request.set_lastlogindex(log.size() - 1);
-        request.set_lastlogterm(log.back().term);
+        int lastLogIndex = log.empty() ? -1 : log.size() - 1;
+        int lastLogTerm = log.empty() ? 0 : log.back().term;
+        request.set_lastlogindex(lastLogIndex);
+        request.set_lastlogterm(lastLogTerm);
 
         raftRpc::RequestVoteResponse response;
         grpc::ClientContext context;
+        std::cout << "request start" << std::endl;
         grpc::Status status = peer->RequestVote(&context, request, &response);
-
+        std::cout << "request finish" << std::endl;
         if (status.ok() && response.votegranted()) {
             votes++;
         }
 
         if (votes > peers.size() / 2) {
+            std::cout << "node: " << id << " become the leader" << std::endl;
             state = "Leader";
             // Initialize leader state
             nextIndex.assign(peers.size(), log.size());
@@ -208,16 +217,28 @@ void RaftNode::tryCommitEntries() {
 }
 
 void RaftNode::sendAppendEntries(int peerIndex) {
+    std::cout << "Node " << id << ": send AppendEntries to follower" << std::endl; 
     raftRpc::AppendEntriesRequest request;
     {
         std::lock_guard<std::mutex> lock(mtx);
+
         request.set_term(currentTerm);
         request.set_leaderid(id);
-        request.set_prevlogindex(nextIndex[peerIndex] - 1);
-        request.set_prevlogterm(log[nextIndex[peerIndex] - 1].term);
+
+        // 检查 nextIndex[peerIndex] 是否大于 0 以避免越界访问
+        if (nextIndex[peerIndex] > 0) {
+            request.set_prevlogindex(nextIndex[peerIndex] - 1);
+            request.set_prevlogterm(log[nextIndex[peerIndex] - 1].term);
+        } else {
+            request.set_prevlogindex(-1); // 对于空日志的情况
+            request.set_prevlogterm(0);    // 或者设置为一个默认值，如 0
+        }
+
         request.set_leadercommit(commitIndex);
 
+        // 添加日志条目
         for (size_t j = nextIndex[peerIndex]; j < log.size(); ++j) {
+            std::cout << "send log:" << log[j].command << std::endl;
             raftRpc::LogEntry* entry = request.add_entries();
             entry->set_index(j);
             entry->set_term(log[j].term);
@@ -228,16 +249,22 @@ void RaftNode::sendAppendEntries(int peerIndex) {
     raftRpc::AppendEntriesResponse response;
     grpc::ClientContext context;
     grpc::Status status = peers[peerIndex]->AppendEntries(&context, request, &response);
+
     {
         std::unique_lock<std::mutex> lock(mtx);
         if (status.ok() && response.success()) {
+            std::cout << "node " << id << ":receive response success from " << peerIndex << std::endl;
             nextIndex[peerIndex] = log.size();
             matchIndex[peerIndex] = log.size() - 1;
         } else {
-            nextIndex[peerIndex]--;
+            // 处理失败情况，确保 nextIndex 不会越界
+            if (nextIndex[peerIndex] > 1) {
+                nextIndex[peerIndex]--;
+            }
         }
     }
 }
+
 
 void RaftNode::appendEntries() {
     std::vector<std::future<void>> futures;
@@ -262,6 +289,7 @@ int RaftNode::start(const std::string& command, std::promise<bool>& resultPromis
         return votedFor;
     }
     std::unique_lock<std::mutex> lock(mtx);
+    std::cout << "Receive SET Operation, start" << std::endl;
     log.push_back({currentTerm, command});
     pendingPromises.push_back(&resultPromise);
     appendEntries();
@@ -269,23 +297,33 @@ int RaftNode::start(const std::string& command, std::promise<bool>& resultPromis
 }
 
 
-bool RaftNode::handleRequestVote(const raftRpc::RequestVoteRequest* request){
-    if(request->term() > currentTerm) {
+bool RaftNode::handleRequestVote(const raftRpc::RequestVoteRequest* request) {
+    if (request->term() > currentTerm) {
+        std::cout << "node: " << id << " exist term higher, be follower" << std::endl;
         currentTerm = request->term();
         votedFor = -1;
         state = "Follower";
     }
 
-    if((votedFor == -1 || votedFor == request->candidateid()) &&
-        (request->lastlogterm() > log.back().term ||
-        (request->lastlogterm() == log.back().term && request->lastlogindex() >= log.size() - 1))){
-            votedFor = request->candidateid();
-            return true;
+    // 确定当前节点最后的日志 term 和 index
+    int lastLogTerm = log.empty() ? 0 : log.back().term;
+    int lastLogIndex = log.empty() ? -1 : log.size() - 1;
+
+    // 检查条件是否满足进行投票
+    if ((votedFor == -1 || votedFor == request->candidateid()) &&
+        (request->lastlogterm() > lastLogTerm ||
+        (request->lastlogterm() == lastLogTerm && request->lastlogindex() >= lastLogIndex))) {
+        std::cout << "node: " << id << " vote for " << request->candidateid() << std::endl;
+        votedFor = request->candidateid();
+        return true;
     }
+
     return false;
 }
 
+
 bool RaftNode::handleAppendEntries(const raftRpc::AppendEntriesRequest* request) {
+    updateLastHeartbeatTime();
     if (request->term() < currentTerm) {
         return false;
     }
