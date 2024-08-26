@@ -61,7 +61,7 @@ class RaftNode {
         std::vector<std::promise<bool>*> pendingPromises;
         std::atomic<bool> running{true};
         std::condition_variable cv; // 用于等待和通知
-        std::chrono::steady_clock::time_point lastHeartbeatTime; // 上一次心跳时间
+        std::atomic<std::chrono::steady_clock::time_point> lastHeartbeatTime; // 上一次心跳时间
         RaftNode(int id, std::string address);
         ~RaftNode();
         void setApplyCh(std::function<bool(const ApplyMsg&)> ch);
@@ -77,8 +77,8 @@ class RaftNode {
         void initPeers(const std::vector<std::string>& peerAddresses);
         void updateLastHeartbeatTime();
     private:
-        int HEARTBEAT_INTERVAL_MS = 100;
-        int ELECTION_TIMEOUT_MS = 1000;
+        int HEARTBEAT_INTERVAL_MS = 1000;
+        int ELECTION_TIMEOUT_MS = 2000;
 
 };
 
@@ -94,18 +94,19 @@ void RaftNode::heartbeat(){
 }
 
 void RaftNode::electionTimeout() {
-    lastHeartbeatTime = std::chrono::steady_clock::now();
+    lastHeartbeatTime.store(std::chrono::steady_clock::now());
     while (running) {
         auto now = std::chrono::steady_clock::now();
         auto timeout = std::chrono::milliseconds(id * ELECTION_TIMEOUT_MS);
+        
         {
             std::unique_lock<std::mutex> lock(mtx);
-            cv.wait_until(lock, lastHeartbeatTime + timeout, [this]() {
-                return !running || std::chrono::steady_clock::now() >= lastHeartbeatTime + std::chrono::milliseconds(ELECTION_TIMEOUT_MS);
+            cv.wait_until(lock, lastHeartbeatTime.load() + timeout, [this]() {
+                return !running || std::chrono::steady_clock::now() >= lastHeartbeatTime.load() + std::chrono::milliseconds(ELECTION_TIMEOUT_MS);
             });
         }
 
-        if (running && std::chrono::steady_clock::now() >= lastHeartbeatTime + timeout) {
+        if (running && std::chrono::steady_clock::now() >= lastHeartbeatTime.load() + timeout) {
             if (state == "Follower" || state == "Candidate") {
                 std::cout << "Election timeout occurred!" << std::endl;
                 startElection();  // 发起选举
@@ -114,15 +115,16 @@ void RaftNode::electionTimeout() {
     }
 }
 
+
 void RaftNode::updateLastHeartbeatTime() {
-    std::unique_lock<std::mutex> lock(mtx);
-    lastHeartbeatTime = std::chrono::steady_clock::now();
+    std::cout << "update time " << std::endl;
+    lastHeartbeatTime.store(std::chrono::steady_clock::now());
     cv.notify_all(); // 通知等待的线程
 }
 
 RaftNode::RaftNode(int id, std::string address) 
-    : id(id), currentTerm(0), votedFor(-1), commitIndex(0), lastApplied(0), address(address), state("Follower") {
-    lastHeartbeatTime = std::chrono::steady_clock::now();
+    : id(id), currentTerm(0), votedFor(-1), commitIndex(-1), lastApplied(-1), address(address), state("Follower") {
+    lastHeartbeatTime.store(std::chrono::steady_clock::now());
 }
 
 RaftNode::~RaftNode(){
@@ -151,7 +153,6 @@ void RaftNode::startElection() {
     votedFor = id;
 
     int votes = 1; // Vote for self
-    std::cout << peers.size() << std::endl;
     for (auto& peer : peers) {
         raftRpc::RequestVoteRequest request;
         request.set_term(currentTerm);
@@ -182,14 +183,14 @@ void RaftNode::startElection() {
 }
 
 void RaftNode::tryCommitEntries() {
+    std::cout << "try commit" << std::endl;
     std::unique_lock<std::mutex> lock(mtx);
-
     std::vector<int> sortedMatchIndex = matchIndex;
     std::sort(sortedMatchIndex.begin(), sortedMatchIndex.end());
 
     // 找到大多数节点都有的日志条目索引
     int majorityIndex = sortedMatchIndex[(sortedMatchIndex.size() - 1) / 2];
-
+    std::cout << "majorIndex: " << majorityIndex << " com" << commitIndex << std::endl;
     // 如果该日志条目的term是当前term，则提交
     if (majorityIndex > commitIndex && log[majorityIndex].term == currentTerm) {
 
@@ -209,7 +210,7 @@ void RaftNode::tryCommitEntries() {
                         std::this_thread::sleep_for(std::chrono::milliseconds(100));
                     }
                 }
-
+                std::cout << "commit" << std::endl;
                 commitIndex = i;  // 更新 commitIndex
                 pendingPromises[commitIndex]->set_value(true);
             }
@@ -249,7 +250,7 @@ void RaftNode::sendAppendEntries(int peerIndex) {
     raftRpc::AppendEntriesResponse response;
     grpc::ClientContext context;
     grpc::Status status = peers[peerIndex]->AppendEntries(&context, request, &response);
-
+    std::cout << "noododoodd" << std::endl;
     {
         std::unique_lock<std::mutex> lock(mtx);
         if (status.ok() && response.success()) {
@@ -288,11 +289,13 @@ int RaftNode::start(const std::string& command, std::promise<bool>& resultPromis
     if(state != "Leader"){
         return votedFor;
     }
-    std::unique_lock<std::mutex> lock(mtx);
-    std::cout << "Receive SET Operation, start" << std::endl;
-    log.push_back({currentTerm, command});
-    pendingPromises.push_back(&resultPromise);
-    appendEntries();
+    {
+        std::unique_lock<std::mutex> lock(mtx);
+        std::cout << "Receive SET Operation, start" << std::endl;
+        log.push_back({currentTerm, command});
+        pendingPromises.push_back(&resultPromise);
+    }
+    //appendEntries();
     return id;
 }
 
@@ -323,13 +326,16 @@ bool RaftNode::handleRequestVote(const raftRpc::RequestVoteRequest* request) {
 
 
 bool RaftNode::handleAppendEntries(const raftRpc::AppendEntriesRequest* request) {
+    std::cout <<request->leaderid() << " " << request->prevlogindex() << " " << request->prevlogterm() <<" " << request->leadercommit() << " " << request->entries().size()<< std::endl;
     updateLastHeartbeatTime();
     if (request->term() < currentTerm) {
+        std::cout << "1" << std::endl;
         return false;
     }
-    if (log.size() <= request->prevlogindex() || log[request->prevlogindex()].term != request->prevlogterm()) {
+    if ((request->prevlogindex() != -1 && log.size() <= request->prevlogindex()) || (request->prevlogindex() != -1 && log[request->prevlogindex()].term != request->prevlogterm())) {
         return false;
-    }
+    }   
+
     log.erase(log.begin() + request->prevlogindex() + 1, log.end());
 
     // Convert Protobuf RepeatedPtrField to std::vector
@@ -342,11 +348,12 @@ bool RaftNode::handleAppendEntries(const raftRpc::AppendEntriesRequest* request)
     }
 
     log.insert(log.end(), newEntries.begin(), newEntries.end());
-
+    std::cout << log.size() << " " << "3333465" << std::endl;
     if (request->leadercommit() > commitIndex) {
+        std::cout << "4" << std::endl;
         commitIndex = std::min(request->leadercommit(), static_cast<int>(log.size() - 1));
     }
-
+    std::cout << "5" << std::endl;
     return true;
 }
 
